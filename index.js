@@ -54,8 +54,18 @@ function init() {
 
 //Function to view roles
 function viewRoles() {
+  const query = `
+    SELECT
+      r.id AS role_id,
+      r.title AS role_title,
+      r.salary,
+      d.name AS department_name
+    FROM role AS r
+    LEFT JOIN department AS d ON r.department_id = d.id
+  `;
+
   sequelize
-    .query("SELECT * FROM role", { type: sequelize.QueryTypes.SELECT })
+    .query(query, { type: sequelize.QueryTypes.SELECT })
     .then((roles) => {
       console.log("\nList of Roles:");
       console.table(roles);
@@ -69,8 +79,23 @@ function viewRoles() {
 
 //Function to view employees
 function viewEmployees() {
+  const query = `
+    SELECT 
+      e.id AS employee_id,
+      e.first_name,
+      e.last_name,
+      r.title AS role,
+      r.salary,
+      d.name AS department,
+      CONCAT(m.first_name, ' ', m.last_name) AS manager
+    FROM employee AS e
+    LEFT JOIN role AS r ON e.role_id = r.id
+    LEFT JOIN department AS d ON r.department_id = d.id
+    LEFT JOIN employee AS m ON e.manager_id = m.id
+  `;
+
   sequelize
-    .query("SELECT * FROM employee", { type: sequelize.QueryTypes.SELECT })
+    .query(query, { type: sequelize.QueryTypes.SELECT })
     .then((employees) => {
       console.log("\nList of Employees:");
       console.table(employees);
