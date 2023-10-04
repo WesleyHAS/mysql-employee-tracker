@@ -268,4 +268,30 @@ function addRole() {
     });
 }
 
+// Function to add new department
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "name",
+        message: "Enter the name of the new department:",
+      },
+    ])
+    .then((departmentData) => {
+      sequelize
+        .query("INSERT INTO department (name) VALUES (?)", {
+          replacements: [departmentData.name],
+        })
+        .then(() => {
+          console.log("Department added successfully!");
+          init();
+        })
+        .catch((err) => {
+          console.error("Error adding department: ", err);
+          init();
+        });
+    });
+}
+
 init();
