@@ -164,4 +164,47 @@ function addEmployee() {
     });
 }
 
+// Function to update employee role
+function updateEmployee() {
+  getRoles()
+    .then((roles) => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "employeeId",
+            message:
+              "Enter the ID of the employee whose role you want to update:",
+          },
+          {
+            type: "list",
+            name: "roleId",
+            message: "Select the updated role:",
+            choices: roles.map((role) => ({
+              name: role.title,
+              value: role.id,
+            })),
+          },
+        ])
+        .then((employeeData) => {
+          sequelize
+            .query("UPDATE employee SET role_id = ? WHERE id = ?", {
+              replacements: [employeeData.roleId, employeeData.employeeId],
+            })
+            .then(() => {
+              console.log("Employee role updated successfully!");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error updating employee role: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching roles: ", err);
+      init();
+    });
+}
+
 init();
