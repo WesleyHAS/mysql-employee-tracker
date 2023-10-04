@@ -207,4 +207,65 @@ function updateEmployee() {
     });
 }
 
+// Fetch the list of departments from the database
+function getDepartments() {
+  return sequelize.query("SELECT id, name FROM department", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+}
+
+// Function to add role
+function addRole() {
+  getDepartments()
+    .then((departments) => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "title",
+            message: "Enter the title of the new role:",
+          },
+          {
+            type: "input",
+            name: "salary",
+            message: "Enter the salary for the new role:",
+          },
+          {
+            type: "list",
+            name: "departmentId",
+            message: "Select the department for the new role:",
+            choices: departments.map((department) => ({
+              name: department.name,
+              value: department.id,
+            })),
+          },
+        ])
+        .then((roleData) => {
+          sequelize
+            .query(
+              "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
+              {
+                replacements: [
+                  roleData.title,
+                  roleData.salary,
+                  roleData.departmentId,
+                ],
+              }
+            )
+            .then(() => {
+              console.log("Role added successfully!");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error adding role: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
+      init();
+    });
+}
+
 init();
