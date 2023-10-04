@@ -11,6 +11,8 @@ function init() {
         message: "What would you like to do?",
         choices: [
           "View All Employees",
+          "View Employees By Manager",
+          "View Employees By Department",
           "Add Employee",
           "Update Employee Role",
           "Update Employee Manager",
@@ -26,6 +28,12 @@ function init() {
       switch (response.actions) {
         case "View All Employees":
           viewEmployees();
+          break;
+        case "View Employees By Manager":
+          viewEmployeesByManagerId();
+          break;
+        case "View Employees By Department":
+          viewEmployeesByDepartment();
           break;
         case "Add Employee":
           addEmployee();
@@ -107,6 +115,108 @@ function viewEmployees() {
     })
     .catch((err) => {
       console.error("Error fetching employees: ", err);
+      init();
+    });
+}
+
+// Function to view employee by manager ID
+function viewEmployeesByManagerId() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "managerId",
+        message: "Enter the Manager ID to view employees managed by them:",
+      },
+    ])
+    .then((response) => {
+      const managerId = parseInt(response.managerId);
+
+      const query = `
+        SELECT 
+          e.id AS employee_id,
+          e.first_name,
+          e.last_name,
+          r.title AS role,
+          r.salary,
+          d.name AS department
+        FROM employee AS e
+        INNER JOIN role AS r ON e.role_id = r.id
+        INNER JOIN department AS d ON r.department_id = d.id
+        WHERE e.manager_id = ?
+        ORDER BY e.id
+      `;
+
+      sequelize
+        .query(query, {
+          type: sequelize.QueryTypes.SELECT,
+          replacements: [managerId],
+        })
+        .then((employees) => {
+          console.log(`\nEmployees managed by Manager ID ${managerId}:`);
+          console.table(employees);
+          init();
+        })
+        .catch((err) => {
+          console.error("Error fetching employees by manager ID: ", err);
+          init();
+        });
+    });
+}
+
+// Function to view employees by department
+function viewEmployeesByDepartment() {
+  const departmentQuery = "SELECT name FROM department";
+
+  sequelize
+    .query(departmentQuery, { type: sequelize.QueryTypes.SELECT })
+    .then((departments) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "departmentName",
+            message:
+              "Select a Department to view employees in that department:",
+            choices: departments.map((department) => department.name),
+          },
+        ])
+        .then((response) => {
+          const departmentName = response.departmentName;
+
+          const query = `
+            SELECT 
+              e.id AS employee_id,
+              e.first_name,
+              e.last_name,
+              r.title AS role,
+              r.salary,
+              d.name AS department
+            FROM employee AS e
+            INNER JOIN role AS r ON e.role_id = r.id
+            INNER JOIN department AS d ON r.department_id = d.id
+            WHERE d.name = ?
+            ORDER BY e.id
+          `;
+
+          sequelize
+            .query(query, {
+              type: sequelize.QueryTypes.SELECT,
+              replacements: [departmentName],
+            })
+            .then((employees) => {
+              console.log(`\nEmployees in the Department: ${departmentName}`);
+              console.table(employees);
+              init();
+            })
+            .catch((err) => {
+              console.error("Error fetching employees by department: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
       init();
     });
 }
