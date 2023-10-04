@@ -2,14 +2,6 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const sequelize = require("./config/connection");
 
-//create a seed for departments
-
-//make a function to view departments
-
-//try to visualize on console
-
-//function to add another department
-
 function init() {
   inquirer
     .prompt([
@@ -53,10 +45,55 @@ function init() {
           addDepartment();
           break;
         case "Quit":
-          sequelize.end();
+          sequelize.close();
           console.log("Goodbye!");
           process.exit();
       }
+    });
+}
+
+//Function to view roles
+function viewRoles() {
+  sequelize
+    .query("SELECT * FROM role", { type: sequelize.QueryTypes.SELECT })
+    .then((roles) => {
+      console.log("\nList of Roles:");
+      console.table(roles);
+      init();
+    })
+    .catch((err) => {
+      console.error("Error fetching roles: ", err);
+      init();
+    });
+}
+
+//Function to view employees
+function viewEmployees() {
+  sequelize
+    .query("SELECT * FROM employee", { type: sequelize.QueryTypes.SELECT })
+    .then((employees) => {
+      console.log("\nList of Employees:");
+      console.table(employees);
+      init();
+    })
+    .catch((err) => {
+      console.error("Error fetching employees: ", err);
+      init();
+    });
+}
+
+//Function to view departments
+function viewDepartments() {
+  sequelize
+    .query("SELECT * FROM department", { type: sequelize.QueryTypes.SELECT })
+    .then((departments) => {
+      console.log("\nList of Departments:");
+      console.table(departments);
+      init();
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
+      init();
     });
 }
 
