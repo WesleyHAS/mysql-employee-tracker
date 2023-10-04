@@ -14,12 +14,15 @@ function init() {
           "View Employees By Manager",
           "View Employees By Department",
           "Add Employee",
+          "Delete Employee",
           "Update Employee Role",
           "Update Employee Manager",
           "View All Roles",
           "Add Role",
+          "Delete Role",
           "View All Departments",
           "Add Department",
+          "Delete Department",
           "Quit",
         ],
       },
@@ -38,6 +41,9 @@ function init() {
         case "Add Employee":
           addEmployee();
           break;
+        case "Delete Employee":
+          deleteEmployee();
+          break;
         case "Update Employee Role":
           updateEmployee();
           break;
@@ -50,11 +56,17 @@ function init() {
         case "Add Role":
           addRole();
           break;
+        case "Delete Role":
+          deleteRole();
+          break;
         case "View All Departments":
           viewDepartments();
           break;
         case "Add Department":
           addDepartment();
+          break;
+        case "Delete Department":
+          deleteDepartment();
           break;
         case "Quit":
           sequelize.close();
@@ -303,6 +315,50 @@ function addEmployee() {
     });
 }
 
+// Function to delete employee
+function deleteEmployee() {
+  const employeeQuery = "SELECT id, first_name, last_name FROM employee";
+
+  sequelize
+    .query(employeeQuery, { type: sequelize.QueryTypes.SELECT })
+    .then((employees) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "employeeId",
+            message: "Select an Employee to delete:",
+            choices: employees.map((employee) => ({
+              name: `${employee.first_name} ${employee.last_name}`,
+              value: employee.id,
+            })),
+          },
+        ])
+        .then((response) => {
+          const employeeId = response.employeeId;
+          const deleteQuery = "DELETE FROM employee WHERE id = ?";
+
+          sequelize
+            .query(deleteQuery, {
+              type: sequelize.QueryTypes.DELETE,
+              replacements: [employeeId],
+            })
+            .then(() => {
+              console.log("Employee deleted successfully.");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error deleting employee: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching employees: ", err);
+      init();
+    });
+}
+
 // Function to update employee role
 function updateEmployee() {
   getRoles()
@@ -439,6 +495,50 @@ function addRole() {
     });
 }
 
+// Function to delete role
+function deleteRole() {
+  const roleQuery = "SELECT id, title FROM role";
+
+  sequelize
+    .query(roleQuery, { type: sequelize.QueryTypes.SELECT })
+    .then((roles) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "roleId",
+            message: "Select a Role to delete:",
+            choices: roles.map((role) => ({
+              name: role.title,
+              value: role.id,
+            })),
+          },
+        ])
+        .then((response) => {
+          const roleId = response.roleId;
+          const deleteQuery = "DELETE FROM role WHERE id = ?";
+
+          sequelize
+            .query(deleteQuery, {
+              type: sequelize.QueryTypes.DELETE,
+              replacements: [roleId],
+            })
+            .then(() => {
+              console.log("Role deleted successfully.");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error deleting role: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching roles: ", err);
+      init();
+    });
+}
+
 // Function to add new department
 function addDepartment() {
   inquirer
@@ -462,6 +562,50 @@ function addDepartment() {
           console.error("Error adding department: ", err);
           init();
         });
+    });
+}
+
+// Function to delete department
+function deleteDepartment() {
+  const departmentQuery = "SELECT id, name FROM department";
+
+  sequelize
+    .query(departmentQuery, { type: sequelize.QueryTypes.SELECT })
+    .then((departments) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "departmentId",
+            message: "Select a Department to delete:",
+            choices: departments.map((department) => ({
+              name: department.name,
+              value: department.id,
+            })),
+          },
+        ])
+        .then((response) => {
+          const departmentId = response.departmentId;
+          const deleteQuery = "DELETE FROM department WHERE id = ?";
+
+          sequelize
+            .query(deleteQuery, {
+              type: sequelize.QueryTypes.DELETE,
+              replacements: [departmentId],
+            })
+            .then(() => {
+              console.log("Department deleted successfully.");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error deleting department: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
+      init();
     });
 }
 
