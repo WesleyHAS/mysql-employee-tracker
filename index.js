@@ -97,4 +97,71 @@ function viewDepartments() {
     });
 }
 
+// Fetch the list of roles from the database
+function getRoles() {
+  return sequelize.query("SELECT id, title FROM role", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+}
+
+// Function to add employee
+function addEmployee() {
+  getRoles()
+    .then((roles) => {
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            name: "firstName",
+            message: "Enter the employee's first name:",
+          },
+          {
+            type: "input",
+            name: "lastName",
+            message: "Enter the employee's last name:",
+          },
+          {
+            type: "list",
+            name: "roleId",
+            message: "Select the employee's role:",
+            choices: roles.map((role) => ({
+              name: role.title,
+              value: role.id,
+            })),
+          },
+          {
+            type: "input",
+            name: "managerId",
+            message: "Enter the employee's manager ID (if applicable):",
+          },
+        ])
+        .then((employeeData) => {
+          sequelize
+            .query(
+              "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",
+              {
+                replacements: [
+                  employeeData.firstName,
+                  employeeData.lastName,
+                  employeeData.roleId,
+                  employeeData.managerId || null,
+                ],
+              }
+            )
+            .then(() => {
+              console.log("Employee added successfully!");
+              init();
+            })
+            .catch((err) => {
+              console.error("Error adding employee: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching roles: ", err);
+      init();
+    });
+}
+
 init();

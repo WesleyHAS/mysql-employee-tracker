@@ -27,7 +27,7 @@ Instructions coming soon!
 
 ## Credits
 
-N/A
+https://blog.devart.com/mysql-insert-statement-inserting-row-into-a-table.html#:~:text=MySQL%20INSERT%20command%20used%20to,'User'%2C%20'Test')%3B
 
 ## License
 
