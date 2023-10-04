@@ -1,7 +1,9 @@
+// Import required modules
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const sequelize = require("./config/connection");
 
+// Function to initialize the application
 function init() {
   inquirer
     .prompt([
@@ -21,6 +23,7 @@ function init() {
           "Add Role",
           "Delete Role",
           "View All Departments",
+          "View Department Budget",
           "Add Department",
           "Delete Department",
           "Quit",
@@ -61,6 +64,9 @@ function init() {
           break;
         case "View All Departments":
           viewDepartments();
+          break;
+        case "View Department Budget":
+          viewDepartmentBudget();
           break;
         case "Add Department":
           addDepartment();
@@ -231,28 +237,6 @@ function viewEmployeesByDepartment() {
       console.error("Error fetching departments: ", err);
       init();
     });
-}
-
-//Function to view departments
-function viewDepartments() {
-  sequelize
-    .query("SELECT * FROM department", { type: sequelize.QueryTypes.SELECT })
-    .then((departments) => {
-      console.log("\nList of Departments:");
-      console.table(departments);
-      init();
-    })
-    .catch((err) => {
-      console.error("Error fetching departments: ", err);
-      init();
-    });
-}
-
-// Fetch the list of roles from the database
-function getRoles() {
-  return sequelize.query("SELECT id, title FROM role", {
-    type: sequelize.QueryTypes.SELECT,
-  });
 }
 
 // Function to add employee
@@ -535,6 +519,85 @@ function deleteRole() {
     })
     .catch((err) => {
       console.error("Error fetching roles: ", err);
+      init();
+    });
+}
+
+//Function to view departments
+function viewDepartments() {
+  sequelize
+    .query("SELECT * FROM department", { type: sequelize.QueryTypes.SELECT })
+    .then((departments) => {
+      console.log("\nList of Departments:");
+      console.table(departments);
+      init();
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
+      init();
+    });
+}
+
+// Fetch the list of roles from the database
+function getRoles() {
+  return sequelize.query("SELECT id, title FROM role", {
+    type: sequelize.QueryTypes.SELECT,
+  });
+}
+
+function viewDepartmentBudget() {
+  const departmentQuery = "SELECT id, name FROM department";
+
+  sequelize
+    .query(departmentQuery, { type: sequelize.QueryTypes.SELECT })
+    .then((departments) => {
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "departmentId",
+            message: "Select a Department to view the total budget:",
+            choices: departments.map((department) => ({
+              name: department.name,
+              value: department.id,
+            })),
+          },
+        ])
+        .then((response) => {
+          const departmentId = response.departmentId;
+          const budgetQuery = `
+            SELECT 
+              SUM(r.salary) AS total_budget
+            FROM employee AS e
+            INNER JOIN role AS r ON e.role_id = r.id
+            WHERE r.department_id = ?
+          `;
+
+          sequelize
+            .query(budgetQuery, {
+              type: sequelize.QueryTypes.SELECT,
+              replacements: [departmentId],
+            })
+            .then((result) => {
+              if (result.length === 0 || result[0].total_budget === null) {
+                console.log(
+                  `\nNo budget information found for the selected department.\n`
+                );
+              } else {
+                console.log(
+                  `\nTotal Utilized Budget for the Department: ${result[0].total_budget}\n`
+                );
+              }
+              init();
+            })
+            .catch((err) => {
+              console.error("Error calculating department budget: ", err);
+              init();
+            });
+        });
+    })
+    .catch((err) => {
+      console.error("Error fetching departments: ", err);
       init();
     });
 }

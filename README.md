@@ -4,7 +4,11 @@
 
 ## Description
 
-This is a command line application that accepts user input to manage employees on a MySQL database.
+This is a content management systems (CMS) application that accepts user input on the cli to manage employees on a MySQL database.
+
+## Page Preview
+
+![Screentshot 1](./assets/images/Screenshot%202023-10-04%20161235.png)
 
 ## Table of Contents
 
@@ -23,11 +27,17 @@ N/A
 
 ## Usage
 
-Instructions coming soon!
+Install necessary dependencies. Run node index and use the arrow to move up and down to select between the options. If you no longer wish to use the application select the 'quit' option.
 
-## Credits
+## Credits and Resources
 
-https://blog.devart.com/mysql-insert-statement-inserting-row-into-a-table.html#:~:text=MySQL%20INSERT%20command%20used%20to,'User'%2C%20'Test')%3B
+https://www.npmjs.com/package/inquirer/v/8.2.4
+
+https://www.npmjs.com/package/mysql2
+
+https://www.npmjs.com/package/sequelize/v/6.3.5
+
+https://www.npmjs.com/package/dotenv
 
 ## License
 
