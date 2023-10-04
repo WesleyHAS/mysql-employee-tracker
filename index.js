@@ -13,6 +13,7 @@ function init() {
           "View All Employees",
           "Add Employee",
           "Update Employee Role",
+          "Update Employee Manager",
           "View All Roles",
           "Add Role",
           "View All Departments",
@@ -31,6 +32,9 @@ function init() {
           break;
         case "Update Employee Role":
           updateEmployee();
+          break;
+        case "Update Employee Manager":
+          updateEmployeeManager();
           break;
         case "View All Roles":
           viewRoles();
@@ -229,6 +233,38 @@ function updateEmployee() {
     .catch((err) => {
       console.error("Error fetching roles: ", err);
       init();
+    });
+}
+
+// Function to update employee manager
+function updateEmployeeManager() {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "employeeId",
+        message:
+          "Enter the ID of the employee whose manager you want to update:",
+      },
+      {
+        type: "input",
+        name: "managerId",
+        message: "Enter the ID of the new manager for the employee:",
+      },
+    ])
+    .then((employeeData) => {
+      sequelize
+        .query("UPDATE employee SET manager_id = ? WHERE id = ?", {
+          replacements: [employeeData.managerId, employeeData.employeeId],
+        })
+        .then(() => {
+          console.log("Employee's manager updated successfully!");
+          init();
+        })
+        .catch((err) => {
+          console.error("Error updating employee's manager: ", err);
+          init();
+        });
     });
 }
 
